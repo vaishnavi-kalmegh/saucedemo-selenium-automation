@@ -1,50 +1,39 @@
-name: SauceDemo Selenium Tests
+name: Automated Selenium Tests
 
 on:
   push:
+    branches: [ main, master ]
   pull_request:
-  workflow_dispatch:
+    branches: [ main, master ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
 
-      - name: Set up Chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+    - name: Run Pytest in Headless Mode
+      run: |
+        pytest -n 2 --headless --browser=chrome --html=reports/report.html --self-contained-html
 
-      - name: Run pytest
-        env:
-          HEADLESS: "true"
-        run: pytest
-
-      - name: Upload pytest HTML report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: pytest-html-report
-          path: reports/report.html
-
-      - name: Upload failure screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: failure-screenshots
-          path: screenshots/
-          if-no-files-found: ignore
+    - name: Archive Test Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-reports
+        path: |
+          reports/
+          screenshots/
