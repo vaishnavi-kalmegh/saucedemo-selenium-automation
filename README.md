@@ -1,6 +1,6 @@
 # SauceDemo E-Commerce UI Test Automation Framework
 
-An enterprise-ready UI test automation framework built to validate critical user journeys on the [SauceDemo](https://www.google.com/search?q=https://www.saucedemo.com/) web application. Designed using the **Page Object Model (POM)** pattern, this framework emphasizes high maintainability, zero arbitrary wait conditions, automated test-failure forensics, and multi-browser execution in headless CI/CD environments.
+An enterprise-ready UI test automation framework built to validate critical user journeys on the [SauceDemo](https://www.saucedemo.com/) web application. Designed using the **Page Object Model (POM)** pattern, this framework emphasizes high maintainability, zero arbitrary wait conditions, automated test-failure forensics, and multi-browser execution in headless CI/CD environments.
 
 ---
 
@@ -46,7 +46,7 @@ An enterprise-ready UI test automation framework built to validate critical user
 ```
 
 1. **Strict Page Object Model (POM):** UI locators and web element interactions reside solely within the `pages/` directory. Test scripts (`tests/`) contain zero raw locator queries, serving strictly as high-level business flows and assertion checks.
-2. **Explicit Wait Paradigm:** No `time.sleep()` is used. The framework implements encapsulated `WebDriverWait` wrappers with `expected_conditions` (such as element visibility and clickability) inside `BasePage` to eliminate test flakiness.
+2. **Explicit Wait Paradigm:** No `time.sleep()` is used. The framework implements encapsulated `WebDriverWait` wrappers with `expected_conditions` (such as element visibility and clickability) inside `BasePage` to reduce test flakiness.
 3. **Fixture-Driven Lifecycle:** Driver setup and teardowns are handled uniformly via Pytest fixtures with clean browser session disposal.
 4. **Automated Defect Diagnostics:** Failed test cases automatically trigger screenshot capture hooks and attach snapshots to test execution reports.
 
@@ -54,7 +54,7 @@ An enterprise-ready UI test automation framework built to validate critical user
 
 ## Key Features
 
-* **Cross-Browser Compatibility:** Seamless switching between Google Chrome and Mozilla Firefox via CLI parameters (`--browser`).
+* **Cross-Browser Compatibility:** Seamless switching between Google Chrome and Mozilla Firefox via CLI parameters (`--browser`). Selenium 4's built-in Selenium Manager resolves browser drivers automatically.
 * **Parallel Test Execution:** Integrated with `pytest-xdist` to reduce test suite runtimes across CPU cores.
 * **Headless Execution for CI:** Compatible with standard headless environments (Linux agents, GitHub Actions).
 * **Dual Reporting:** Generates lightweight standalone HTML reports as well as rich interactive Allure dashboards.
@@ -92,7 +92,7 @@ saucedemo-selenium-automation/
 
 ---
 
-## Test Strategy and Coverage
+## Test Strategy and Coverage\n\nThe suite currently contains **17 automated test cases** across login, cart, and checkout flows.
 
 | Test Module | Suite | Test Description | Assertion / Expected Outcome |
 | --- | --- | --- | --- |
@@ -227,6 +227,6 @@ Continuous Integration is orchestrated through **GitHub Actions**. On every push
 
 1. Spins up an `ubuntu-latest` headless container.
 2. Configures Python and installs pinned dependencies via pip cache.
-3. Executes the test suite concurrently in headless Chrome.
+3. Uses Selenium Manager to resolve the Chrome driver and executes the test suite concurrently in headless Chrome.
 4. Captures execution logs, test outputs, and on-failure screenshots.
 5. Uploads test reports as persistent workflow artifacts.
