@@ -2,6 +2,7 @@ name: SauceDemo Selenium Tests
 
 on:
   push:
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -18,8 +19,15 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Set up Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run pytest
         env:
@@ -38,5 +46,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: failure-screenshots
-          path: reports/screenshots/
+          path: screenshots/
           if-no-files-found: ignore
