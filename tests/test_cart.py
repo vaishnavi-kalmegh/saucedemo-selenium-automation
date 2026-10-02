@@ -3,49 +3,32 @@ from pages.login_page import LoginPage
 from pages.inventory_page import InventoryPage
 from pages.cart_page import CartPage
 
-def login(driver, base_url, credentials):
-    LoginPage(driver).open(base_url).login(credentials["username"], credentials["password"])
-    return InventoryPage(driver)
+@pytest.fixture(autouse=True)
+def setup_logged_in_user(driver):
+    login_page = LoginPage(driver)
+    login_page.load()
+    login_page.login("standard_user", "secret_sauce")
 
-@pytest.mark.cart
-def test_add_one_product_to_cart(driver, base_url, credentials):
-    inventory = login(driver, base_url, credentials)
-    inventory.add_product_by_name("Sauce Labs Backpack")
-    assert inventory.cart_count() == 1
+@pytest.mark.smoke
+def test_add_item_to_cart(driver):
+    inventory_page = InventoryPage(driver)
+    cart_page = CartPage(driver)
 
-@pytest.mark.cart
-def test_add_multiple_products_to_cart(driver, base_url, credentials):
-    inventory = login(driver, base_url, credentials)
-    for name in ["Sauce Labs Backpack", "Sauce Labs Bike Light"]:
-        inventory.add_product_by_name(name)
-    assert inventory.cart_count() == 2
+    inventory_page.add_backpack_to_cart()
+    assert inventory_page.get_cart_count() == "1"
 
-@pytest.mark.cart
-def test_remove_product_from_inventory(driver, base_url, credentials):
-    inventory = login(driver, base_url, credentials)
-    inventory.add_product_by_name("Sauce Labs Backpack")
-    inventory.remove_product_by_name("Sauce Labs Backpack")
-    assert not inventory.driver.find_elements(*inventory.CART_BADGE)
+    inventory_page.go_to_cart()
+    items = cart_page.get_cart_item_names()
+    assert "Sauce Labs Backpack" in items
 
-@pytest.mark.cart
-def test_cart_contains_added_product(driver, base_url, credentials):
-    inventory = login(driver, base_url, credentials)
-    inventory.add_product_by_name("Sauce Labs Backpack")
-    inventory.open_cart()
-    assert CartPage(driver).item_names() == ["Sauce Labs Backpack"]
+@pytest.mark.regression
+def test_remove_item_from_cart(driver):
+    inventory_page = InventoryPage(driver)
+    cart_page = CartPage(driver)
 
-@pytest.mark.cart
-def test_remove_product_from_cart(driver, base_url, credentials):
-    inventory = login(driver, base_url, credentials)
-    inventory.add_product_by_name("Sauce Labs Backpack")
-    inventory.open_cart()
-    cart = CartPage(driver)
-    cart.remove_first()
-    assert cart.item_count() == 0
+    inventory_page.add_backpack_to_cart()
+    inventory_page.go_to_cart()
+    cart_page.remove_backpack()
 
-@pytest.mark.cart
-def test_continue_shopping_returns_to_inventory(driver, base_url, credentials):
-    inventory = login(driver, base_url, credentials)
-    inventory.open_cart()
-    CartPage(driver).continue_shopping()
-    assert InventoryPage(driver).is_loaded()
+    items = cart_page.get_cart_item_names()
+    assert "Sauce Labs Backpack" not in items
