@@ -1,28 +1,15 @@
 from selenium.webdriver.common.by import By
-from .base_page import BasePage
+from pages.base_page import BasePage
+
 
 class CartPage(BasePage):
-    TITLE = (By.CSS_SELECTOR, ".title")
-    CART_ITEMS = (By.CSS_SELECTOR, ".cart_item")
-    ITEM_NAMES = (By.CSS_SELECTOR, ".inventory_item_name")
-    REMOVE_BUTTONS = (By.CSS_SELECTOR, "button[data-test^='remove']")
-    CONTINUE = (By.ID, "continue-shopping")
-    CHECKOUT = (By.ID, "checkout")
+    CART_ITEM = (By.CLASS_NAME, "cart_item")
+    CHECKOUT_BUTTON = (By.ID, "checkout")
+    ITEM_NAME = (By.CLASS_NAME, "inventory_item_name")
 
-    def is_loaded(self):
-        return self.get_text(self.TITLE) == "Your Cart"
+    def get_cart_item_names(self) -> list[str]:
+        items = self.find_all(self.ITEM_NAME)
+        return [item.text for item in items]
 
-    def item_names(self):
-        return [e.text for e in self.driver.find_elements(*self.ITEM_NAMES)]
-
-    def item_count(self):
-        return len(self.driver.find_elements(*self.CART_ITEMS))
-
-    def remove_first(self):
-        self.click(self.REMOVE_BUTTONS)
-
-    def continue_shopping(self):
-        self.click(self.CONTINUE)
-
-    def checkout(self):
-        self.click(self.CHECKOUT)
+    def proceed_to_checkout(self):
+        self.click(self.CHECKOUT_BUTTON)
