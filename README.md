@@ -10,17 +10,16 @@ An enterprise-ready UI test automation framework built to validate critical user
 
 ---
 
-## 📑 Table of Contents
-- [Architecture & Design Principles](#-architecture--design-principles)
-- [Key Features](#-key-features)
-- [Project Directory Structure](#-project-directory-structure)
-- [Test Strategy & Coverage](#-test-strategy--coverage)
-- [Prerequisites & Installation](#-prerequisites--installation)
-- [Test Execution Guide](#-test-execution-guide)
-- [Reporting & Artifacts](#-reporting--artifacts)
-- [CI/CD Pipeline](#-cicd-pipeline)
-- [Author & Contact](#-author--contact)
+## Table of Contents
+- [Architecture and Design Principles](#architecture-and-design-principles)
+- [Key Features](#key-features)
+- [Project Directory Structure](#project-directory-structure)
+- [Test Strategy and Coverage](#test-strategy-and-coverage)
+- [Prerequisites and Installation](#prerequisites-and-installation)
+- [Test Execution Guide](#test-execution-guide)
+- [Reporting and Artifacts](#reporting-and-artifacts)
+- [CICD Pipeline](#cicd-pipeline)
 
 ---
 
-## 🏛 Architecture & Design Principles
+## Architecture and Design Principles
