@@ -1,23 +1,28 @@
-import pytest
-from pages.login_page import LoginPage
-from pages.inventory_page import InventoryPage
+from selenium.webdriver.common.by import By
+from pages.base_page import BasePage
 
-@pytest.mark.smoke
-def test_successful_login(driver):
-    login_page = LoginPage(driver)
-    inventory_page = InventoryPage(driver)
 
-    login_page.load()
-    login_page.login("standard_user", "secret_sauce")
+class LoginPage(BasePage):
+    USERNAME_INPUT = (By.ID, "user-name")
+    PASSWORD_INPUT = (By.ID, "password")
+    LOGIN_BUTTON = (By.ID, "login-button")
+    ERROR_MESSAGE = (By.CSS_SELECTOR, "[data-test='error']")
 
-    assert inventory_page.is_inventory_displayed(), "Inventory page should be visible upon login."
+    def load(self, url: str = "https://www.saucedemo.com/"):
+        self.open_url(url)
+        return self
 
-@pytest.mark.regression
-def test_locked_out_user_error(driver):
-    login_page = LoginPage(driver)
+    def open(self, url: str):
+        return self.load(url)
 
-    login_page.load()
-    login_page.login("locked_out_user", "secret_sauce")
+    def login(self, username: str, password: str):
+        self.enter_text(self.USERNAME_INPUT, username)
+        self.enter_text(self.PASSWORD_INPUT, password)
+        self.click(self.LOGIN_BUTTON)
+        return self
 
-    expected_error = "Epic sadface: Sorry, this user has been locked out."
-    assert expected_error in login_page.get_error_message()
+    def error_message(self) -> str:
+        return self.get_text(self.ERROR_MESSAGE)
+
+    def get_error_message(self) -> str:
+        return self.error_message()
