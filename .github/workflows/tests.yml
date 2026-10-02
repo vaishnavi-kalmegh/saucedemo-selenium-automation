@@ -1,39 +1,44 @@
-name: Automated Selenium Tests
+name: SauceDemo Selenium Tests
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main]
   pull_request:
-    branches: [ main, master ]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        cache: 'pip'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
 
-    - name: Install Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
 
-    - name: Run Pytest in Headless Mode
-      run: |
-        pytest -n 2 --headless --browser=chrome --html=reports/report.html --self-contained-html
+      - name: Run tests
+        run: |
+          pytest -n 2 --headless --browser=chrome             --html=reports/report.html             --self-contained-html
 
-    - name: Archive Test Results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-reports
-        path: |
-          reports/
-          screenshots/
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: saucedemo-test-results
+          path: |
+            reports/
+            screenshots/
