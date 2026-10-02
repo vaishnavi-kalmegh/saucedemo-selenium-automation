@@ -6,3 +6,4 @@ venv/
 reports/screenshots/
 reports/*.html
 .DS_Store
+screenshots/*.png\nreports/allure-results/\n
