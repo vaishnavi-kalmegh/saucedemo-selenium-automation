@@ -4,49 +4,32 @@ from pages.inventory_page import InventoryPage
 from pages.cart_page import CartPage
 from pages.checkout_page import CheckoutPage
 
-def checkout_page(driver, base_url, credentials):
-    LoginPage(driver).open(base_url).login(credentials["username"], credentials["password"])
-    inventory = InventoryPage(driver)
-    inventory.add_product_by_name("Sauce Labs Backpack")
-    inventory.open_cart()
-    CartPage(driver).checkout()
-    return CheckoutPage(driver)
+@pytest.fixture(autouse=True)
+def setup_cart_with_item(driver):
+    login_page = LoginPage(driver)
+    login_page.load()
+    login_page.login("standard_user", "secret_sauce")
 
-@pytest.mark.checkout
-def test_checkout_information_page_loads(driver, base_url, credentials):
-    assert checkout_page(driver, base_url, credentials).is_loaded()
+    inventory_page = InventoryPage(driver)
+    inventory_page.add_backpack_to_cart()
+    inventory_page.go_to_cart()
 
-@pytest.mark.checkout
-def test_checkout_requires_first_name(driver, base_url, credentials):
-    page = checkout_page(driver, base_url, credentials)
-    page.fill_info("", "Tester", "411001")
-    page.continue_checkout()
-    assert "First Name is required" in page.error_message()
+    cart_page = CartPage(driver)
+    cart_page.proceed_to_checkout()
 
-@pytest.mark.checkout
-def test_checkout_requires_last_name(driver, base_url, credentials):
-    page = checkout_page(driver, base_url, credentials)
-    page.fill_info("QA", "", "411001")
-    page.continue_checkout()
-    assert "Last Name is required" in page.error_message()
+@pytest.mark.smoke
+def test_successful_checkout(driver):
+    checkout_page = CheckoutPage(driver)
+    checkout_page.fill_shipping_information("Jane", "Doe", "94016")
+    checkout_page.finish_checkout()
 
-@pytest.mark.checkout
-def test_checkout_requires_postal_code(driver, base_url, credentials):
-    page = checkout_page(driver, base_url, credentials)
-    page.fill_info("QA", "Tester", "")
-    page.continue_checkout()
-    assert "Postal Code is required" in page.error_message()
+    header = checkout_page.get_completion_header_text()
+    assert "Thank you for your order!" in header
 
-@pytest.mark.checkout
-def test_checkout_cancel_returns_to_cart(driver, base_url, credentials):
-    page = checkout_page(driver, base_url, credentials)
-    page.cancel()
-    assert CartPage(driver).is_loaded()
+@pytest.mark.regression
+def test_checkout_missing_postal_code(driver):
+    checkout_page = CheckoutPage(driver)
+    checkout_page.fill_shipping_information("Jane", "Doe", "")
 
-@pytest.mark.checkout
-def test_successful_checkout(driver, base_url, credentials):
-    page = checkout_page(driver, base_url, credentials)
-    page.fill_info("QA", "Tester", "411001")
-    page.continue_checkout()
-    page.finish()
-    assert page.confirmation() == "Thank you for your order!"
+    error = checkout_page.get_error_message()
+    assert "Error: Postal Code is required" in error
