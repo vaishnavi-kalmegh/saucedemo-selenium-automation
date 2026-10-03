@@ -173,6 +173,9 @@ These images are captured from real Selenium runs; they are not mockups.
 
 ![Pytest HTML report](docs/images/pytest-report.png)
 
+### Test results (18 passed)
+![Test results](docs/images/test-results.png)
+
 ## CI/CD
 
 GitHub Actions runs the full suite on:
