@@ -1,232 +1,201 @@
-# SauceDemo E-Commerce UI Test Automation Framework
+# SauceDemo Selenium + Python + pytest
 
-An enterprise-ready UI test automation framework built to validate critical user journeys on the [SauceDemo](https://www.saucedemo.com/) web application. Designed using the **Page Object Model (POM)** pattern, this framework emphasizes high maintainability, zero arbitrary wait conditions, automated test-failure forensics, and multi-browser execution in headless CI/CD environments.
+[![CI](https://github.com/vaishnavi-kalmegh/saucedemo-selenium-automation/actions/workflows/tests.yml/badge.svg)](https://github.com/vaishnavi-kalmegh/saucedemo-selenium-automation/actions/workflows/tests.yml)
 
----
+A portfolio-ready UI automation framework for [SauceDemo](https://www.saucedemo.com/) using **Python, Selenium WebDriver, pytest, and the Page Object Model (POM)**.
 
-## Table of Contents
+The project demonstrates maintainable test design, explicit waits, reusable fixtures, failure screenshots, self-contained HTML reporting, and GitHub Actions CI.
 
-* Architecture and Design Principles
-* Key Features
-* Project Directory Structure
-* Test Strategy and Coverage
-* Prerequisites and Installation
-* Test Execution Guide
-* Reporting and Artifacts
-* CI/CD Pipeline
+## What is covered
 
----
+The suite contains **18 automated tests**:
 
-## Architecture and Design Principles
+| Area | Tests | Coverage |
+| --- | ---: | --- |
+| Login | 6 | Valid login, invalid credentials, required fields, locked-out user |
+| Cart | 6 | Add one/two products, remove products, cart state, continue shopping |
+| Checkout | 6 | Successful order, required-field validation, cancel flow, overview total |
 
-```
-  +-------------------------------------------------------------+
-  |                        Test Layer                           |
-  |    (test_login.py, test_cart.py, test_checkout.py)         |
-  +------------------------------+------------------------------+
-                                 | calls actions & assertions
-                                 v
-  +-------------------------------------------------------------+
-  |                      Page Object Layer                      |
-  |     (LoginPage, InventoryPage, CartPage, CheckoutPage)       |
-  +------------------------------+------------------------------+
-                                 | inherits
-                                 v
-  +-------------------------------------------------------------+
-  |                          BasePage                           |
-  |      (Dynamic Explicit Waits, Locator Strategy, Wrappers)   |
-  +------------------------------+------------------------------+
-                                 | uses
-                                 v
-  +-------------------------------------------------------------+
-  |              Selenium WebDriver + Browser Drivers            |
-  |                (Chrome, Firefox via Manager)                |
-  +-------------------------------------------------------------+
+All tests use the login, cart, or checkout pytest marker.
 
-```
+## Framework structure
 
-1. **Strict Page Object Model (POM):** UI locators and web element interactions reside solely within the `pages/` directory. Test scripts (`tests/`) contain zero raw locator queries, serving strictly as high-level business flows and assertion checks.
-2. **Explicit Wait Paradigm:** No `time.sleep()` is used. The framework implements encapsulated `WebDriverWait` wrappers with `expected_conditions` (such as element visibility and clickability) inside `BasePage` to reduce test flakiness.
-3. **Fixture-Driven Lifecycle:** Driver setup and teardowns are handled uniformly via Pytest fixtures with clean browser session disposal.
-4. **Automated Defect Diagnostics:** Failed test cases automatically trigger screenshot capture hooks and attach snapshots to test execution reports.
-
----
-
-## Key Features
-
-* **Cross-Browser Compatibility:** Seamless switching between Google Chrome and Mozilla Firefox via CLI parameters (`--browser`). Selenium 4's built-in Selenium Manager resolves browser drivers automatically.
-* **Parallel Test Execution:** Integrated with `pytest-xdist` to reduce test suite runtimes across CPU cores.
-* **Headless Execution for CI:** Compatible with standard headless environments (Linux agents, GitHub Actions).
-* **Dual Reporting:** Generates lightweight standalone HTML reports as well as rich interactive Allure dashboards.
-* **Categorized Test Suites:** Test cases tagged with `@pytest.mark.smoke` and `@pytest.mark.regression` for targeted regression and release verification.
-
----
-
-## Project Directory Structure
-
-```text
+~~~
 saucedemo-selenium-automation/
-├── .github/
-│   └── workflows/
-│       └── tests.yml             # GitHub Actions CI workflow definition
+├── .github/workflows/tests.yml
+├── docs/images/                         # Real Selenium evidence screenshots
+│   ├── login-page.png
+│   ├── inventory-page.png
+│   └── pytest-report.png
 ├── pages/
-│   ├── __init__.py
-│   ├── base_page.py              # Parent page containing explicit wait abstractions
-│   ├── login_page.py             # Login selectors and authentication interactions
-│   ├── inventory_page.py         # Product catalog actions and inventory validations
-│   ├── cart_page.py              # Cart management and quantity verification
-│   └── checkout_page.py          # End-to-end checkout information and confirmation
+│   ├── base_page.py
+│   ├── login_page.py
+│   ├── inventory_page.py
+│   ├── cart_page.py
+│   └── checkout_page.py
+├── reports/
+│   └── screenshots/                     # Failure screenshots; git-ignored
+├── scripts/
+│   └── capture_portfolio_screenshots.py
 ├── tests/
-│   ├── __init__.py
-│   ├── test_login.py             # Authentication scenarios (positive & negative)
-│   ├── test_cart.py              # Add/remove item verifications
-│   └── test_checkout.py          # E2E purchase flow and tax/total assertions
-├── reports/                      # Generated HTML and Allure test reports
-├── screenshots/                  # Failure capture artifacts
-├── conftest.py                   # Pytest hooks, CLI parameters, and browser fixtures
-├── pytest.ini                   # Pytest runtime configuration and markers
-├── requirements.txt              # Production and testing dependencies
-└── README.md                     # Framework documentation
+│   ├── test_login.py
+│   ├── test_cart.py
+│   └── test_checkout.py
+├── conftest.py
+├── pytest.ini
+├── requirements.txt
+└── README.md
+~~~
 
-```
+### Page Object Model
 
----
+- Locators and Selenium interactions live in pages/.
+- Tests contain business flows and assertions, not raw Selenium locators.
+- BasePage centralizes explicit wait helpers.
+- conftest.py provides reusable browser, credentials, login, and checkout fixtures.
 
-## Test Strategy and Coverage\n\nThe suite currently contains **17 automated test cases** across login, cart, and checkout flows.
+### Synchronization
 
-| Test Module | Suite | Test Description | Assertion / Expected Outcome |
-| --- | --- | --- | --- |
-| `test_login` | `smoke` | Valid credential authentication | Verifies redirection to inventory and page title visibility |
-| `test_login` | `regression` | Locked-out user authentication | Verifies dynamic error notification message display |
-| `test_login` | `regression` | Empty username and password submission | Verifies required-field validation messages |
-| `test_cart` | `smoke` | Add single item to shopping cart | Badge counter increments to 1; item appears in cart view |
-| `test_cart` | `regression` | Remove item from cart and inventory | Cart badge updates dynamically and removes item container |
-| `test_checkout` | `smoke` | Complete End-to-End order workflow | Order completes with "Thank you for your order!" banner |
-| `test_checkout` | `regression` | Checkout with missing postal code | Prevents checkout progression and displays form validation error |
+The framework uses WebDriverWait with Selenium expected conditions. There is **no time.sleep()**.
 
----
+### Credentials
 
-## Prerequisites and Installation
+The public SauceDemo demo credentials are used by default:
 
-### 1. Prerequisites
+- Username: standard_user
+- Password: secret_sauce
 
-* Python 3.10+
-* Google Chrome or Mozilla Firefox installed
-* Git
+They are overridable without changing source code:
 
-### 2. Setup Virtual Environment
+~~~
+SAUCE_USERNAME=your_user
+SAUCE_PASSWORD=your_password
+BASE_URL=https://www.saucedemo.com/
+HEADLESS=true
+~~~
 
-Clone the repository:
+On Windows PowerShell:
 
-```bash
-git clone https://github.com/vaishnavi-kalmegh/saucedemo-selenium-automation.git
-cd saucedemo-selenium-automation
+~~~
+$env:SAUCE_USERNAME="your_user"
+$env:SAUCE_PASSWORD="your_password"
+$env:HEADLESS="true"
+~~~
 
-```
+## Installation
 
-Create virtual environment:
+Prerequisites:
 
-```bash
-python -m venv venv
+- Python 3.12 recommended
+- Google Chrome
+- Git
 
-```
+Create and activate a virtual environment:
 
-Activate environment:
+### Windows
 
-* On macOS/Linux: `source venv/bin/activate`
-* On Windows: `venv\Scripts\activate`
+~~~
+python -m venv .venv
+.venv\Scripts\activate
+~~~
 
-Install dependencies:
+### macOS/Linux
 
-```bash
-pip install --upgrade pip
+~~~
+python3 -m venv .venv
+source .venv/bin/activate
+~~~
+
+Install the pinned dependencies:
+
+~~~
+python -m pip install --upgrade pip
 pip install -r requirements.txt
+~~~
 
-```
+## Run the tests
 
----
+The default configuration is headless Chrome:
 
-## Test Execution Guide
-
-### Standard Execution
-
-Run all tests on Chrome (headed mode):
-
-```bash
+~~~
 pytest
+~~~
 
-```
+Run a headed browser by overriding the environment variable:
 
-Run tests in headless mode:
+~~~
+HEADLESS=false pytest
+~~~
 
-```bash
-pytest --headless
+Run a specific suite:
 
-```
+~~~
+pytest -m login
+pytest -m cart
+pytest -m checkout
+~~~
 
-Run on Mozilla Firefox:
+Run Firefox:
 
-```bash
-pytest --browser=firefox --headless
+~~~
+pytest --browser=firefox
+~~~
 
-```
+The default pytest configuration creates a self-contained report at:
 
-### Targeted Execution via Markers
+~~~
+reports/report.html
+~~~
 
-Run only critical-path smoke tests:
+## Failure evidence
 
-```bash
-pytest -m smoke
+When a test fails, pytest captures a screenshot under:
 
-```
+~~~
+reports/screenshots/
+~~~
 
-Run full regression suite:
+Those screenshots are attached to the pytest HTML report and are ignored by Git so local/CI failure artifacts do not clutter the repository.
 
-```bash
-pytest -m regression
+## Screenshots
 
-```
+These images are captured from real Selenium runs; they are not mockups.
 
-### Parallel Execution
+### SauceDemo login page
 
-Run tests distributed across 3 CPU cores:
+![SauceDemo login page](docs/images/login-page.png)
 
-```bash
-pytest -n 3 --headless
+### SauceDemo inventory page
 
-```
+![SauceDemo inventory page](docs/images/inventory-page.png)
 
----
+### Pytest HTML report
 
-## Reporting and Artifacts
+![Pytest HTML report](docs/images/pytest-report.png)
 
-### 1. Pytest HTML Reports
+## CI/CD
 
-Generate a single-file, self-contained HTML report:
+GitHub Actions runs the full suite on:
 
-```bash
-pytest --html=reports/report.html --self-contained-html
+- every push to main
+- pull requests targeting main
+- manual workflow_dispatch
 
-```
+The workflow uses **Python 3.12**, pip dependency caching, headless Chrome, and the pinned requirements file. Test reports and failure screenshots are uploaded as workflow artifacts.
 
-### 2. Allure Interactive Reports
+After a successful main-branch run, the workflow captures the three portfolio screenshots with Selenium and commits updated evidence images under docs/images/.
 
-Generate visual test metrics, execution timelines, and attached screenshots:
+## Portfolio highlights
 
-```bash
-pytest --alluredir=reports/allure-results
-allure serve reports/allure-results
+This project demonstrates:
 
-```
-
----
-
-## CI/CD Pipeline
-
-Continuous Integration is orchestrated through **GitHub Actions**. On every push and pull request to `main`:
-
-1. Spins up an `ubuntu-latest` headless container.
-2. Configures Python and installs pinned dependencies via pip cache.
-3. Uses Selenium Manager to resolve the Chrome driver and executes the test suite concurrently in headless Chrome.
-4. Captures execution logs, test outputs, and on-failure screenshots.
-5. Uploads test reports as persistent workflow artifacts.
+- Page Object Model design
+- 18 meaningful UI tests
+- Explicit Selenium waits
+- pytest fixtures and markers
+- Environment-overridable credentials
+- Headless CI execution
+- Self-contained HTML reporting
+- Automated failure screenshots
+- Real browser evidence checked into the README
+- GitHub Actions test automation
