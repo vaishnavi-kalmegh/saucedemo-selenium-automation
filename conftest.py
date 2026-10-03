@@ -1,3 +1,4 @@
+import base64
 import os
 from datetime import datetime
 
@@ -83,7 +84,9 @@ def logged_in(driver, base_url, credentials):
     from pages.inventory_page import InventoryPage
     from pages.login_page import LoginPage
 
-    LoginPage(driver).load(base_url).login(credentials["username"], credentials["password"])
+    LoginPage(driver).load(base_url).login(
+        credentials["username"], credentials["password"]
+    )
     inventory = InventoryPage(driver)
     inventory.wait_for_url("inventory.html")
     return inventory
@@ -121,7 +124,11 @@ def pytest_runtest_makereport(item, call):
             try:
                 import pytest_html
 
+                with open(file_path, "rb") as image_file:
+                    image_data = base64.b64encode(image_file.read()).decode("ascii")
                 report.extras = getattr(report, "extras", [])
-                with open(file_path, "rb") as image_file:\n                    image_data = base64.b64encode(image_file.read()).decode("ascii")\n                report.extras.append(\n                    pytest_html.extras.image(image_data, mime_type="image/png")\n                )
+                report.extras.append(
+                    pytest_html.extras.image(image_data, mime_type="image/png")
+                )
             except ImportError:
                 pass
