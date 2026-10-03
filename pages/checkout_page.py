@@ -26,6 +26,7 @@ class CheckoutPage(BasePage):
 
     def cancel_checkout(self):
         self.click(self.CANCEL_BUTTON)
+        self.wait_for_url("cart.html")
 
     def get_completion_header_text(self) -> str:
         return self.get_text(self.COMPLETE_HEADER)
