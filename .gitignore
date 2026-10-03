@@ -3,7 +3,6 @@ __pycache__/
 .pytest_cache/
 .venv/
 venv/
-reports/screenshots/
 reports/*.html
+reports/screenshots/
 .DS_Store
-screenshots/*.png\nreports/allure-results/\n
