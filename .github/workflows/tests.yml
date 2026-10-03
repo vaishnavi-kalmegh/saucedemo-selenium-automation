@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test:
@@ -30,9 +30,31 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Run tests
+      - name: Run pytest
         run: |
-          pytest -n 2 --headless --browser=chrome             --html=reports/report.html             --self-contained-html
+          mkdir -p reports
+          pytest
+        env:
+          HEADLESS: "true"
+
+      - name: Capture portfolio screenshots
+        if: success()
+        run: python scripts/capture_portfolio_screenshots.py
+        env:
+          HEADLESS: "true"
+
+      - name: Commit real portfolio screenshots
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/images/*.png
+          if git diff --cached --quiet; then
+            echo "No screenshot changes to commit."
+          else
+            git commit -m "docs: update real test evidence screenshots [skip ci]"
+            git push
+          fi
 
       - name: Upload test artifacts
         if: always()
@@ -40,5 +62,6 @@ jobs:
         with:
           name: saucedemo-test-results
           path: |
-            reports/
-            screenshots/
+            reports/report.html
+            reports/screenshots/
+            docs/images/
