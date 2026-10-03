@@ -13,17 +13,20 @@ class CartPage(BasePage):
     def get_cart_item_names(self):
         return [item.text.strip() for item in self.driver.find_elements(*self.ITEM_NAME)]
 
-    def get_cart_item_count(self) -> int:
+    def get_cart_item_count(self):
         return len(self.driver.find_elements(*self.CART_ITEM))
 
-    def is_empty(self) -> bool:
+    def is_empty(self):
         return self.get_cart_item_count() == 0
 
     def remove_backpack(self):
         self.click(self.REMOVE_BACKPACK_BUTTON)
+        self.wait_until_invisible(self.CART_ITEM)
 
     def proceed_to_checkout(self):
         self.click(self.CHECKOUT_BUTTON)
+        self.wait_for_url("checkout-step-one.html")
 
     def continue_shopping(self):
         self.click(self.CONTINUE_SHOPPING_BUTTON)
+        self.wait_for_url("inventory.html")
