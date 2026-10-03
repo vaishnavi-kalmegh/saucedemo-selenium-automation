@@ -84,7 +84,9 @@ def logged_in(driver, base_url, credentials):
     from pages.login_page import LoginPage
 
     LoginPage(driver).load(base_url).login(credentials["username"], credentials["password"])
-    return InventoryPage(driver)
+    inventory = InventoryPage(driver)
+    inventory.wait_for_url("inventory.html")
+    return inventory
 
 
 @pytest.fixture
