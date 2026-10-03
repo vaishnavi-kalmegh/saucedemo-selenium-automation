@@ -122,6 +122,6 @@ def pytest_runtest_makereport(item, call):
                 import pytest_html
 
                 report.extras = getattr(report, "extras", [])
-                report.extras.append(pytest_html.extras.image(file_path))
+                with open(file_path, "rb") as image_file:\n                    image_data = base64.b64encode(image_file.read()).decode("ascii")\n                report.extras.append(\n                    pytest_html.extras.image(image_data, mime_type="image/png")\n                )
             except ImportError:
                 pass
