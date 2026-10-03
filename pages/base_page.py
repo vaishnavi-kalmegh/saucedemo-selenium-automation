@@ -1,4 +1,5 @@
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -15,10 +16,17 @@ class BasePage:
         return self.wait.until(EC.presence_of_element_located(locator))
 
     def click(self, locator):
-        self.wait.until(EC.element_to_be_clickable(locator)).click()
+        element = self.wait.until(EC.element_to_be_clickable(locator))
+        self.driver.execute_script(
+            "arguments[0].scrollIntoView({block: 'center', inline: 'center'});", element
+        )
+        ActionChains(self.driver).move_to_element(element).click().perform()
 
     def enter_text(self, locator, text):
         element = self.wait.until(EC.visibility_of_element_located(locator))
+        self.driver.execute_script(
+            "arguments[0].scrollIntoView({block: 'center', inline: 'center'});", element
+        )
         element.clear()
         element.send_keys(text)
 
@@ -30,3 +38,9 @@ class BasePage:
             return bool(self.wait.until(EC.visibility_of_element_located(locator)))
         except TimeoutException:
             return False
+
+    def wait_until_invisible(self, locator):
+        return self.wait.until(EC.invisibility_of_element_located(locator))
+
+    def wait_for_url(self, fragment):
+        self.wait.until(EC.url_contains(fragment))
