@@ -28,6 +28,22 @@ class BasePage:
         )
         element.clear()
         element.send_keys(text)
+        if element.get_attribute("value") != text:
+            self.driver.execute_script(
+                """
+                const element = arguments[0];
+                const value = arguments[1];
+                const setter = Object.getOwnPropertyDescriptor(
+                    HTMLInputElement.prototype, "value"
+                ).set;
+                setter.call(element, value);
+                element.dispatchEvent(new Event("input", {bubbles: true}));
+                element.dispatchEvent(new Event("change", {bubbles: true}));
+                """,
+                element,
+                text,
+            )
+        self.wait.until(lambda driver: element.get_attribute("value") == text)
 
     def get_text(self, locator):
         return self.wait.until(EC.visibility_of_element_located(locator)).text.strip()
