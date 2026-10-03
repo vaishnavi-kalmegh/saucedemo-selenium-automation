@@ -16,35 +16,40 @@ class InventoryPage(BasePage):
     ADD_TO_CART_BIKE_LIGHT = (By.ID, "add-to-cart-sauce-labs-bike-light")
     ADD_TO_CART_BOLT_SHIRT = (By.ID, "add-to-cart-sauce-labs-bolt-t-shirt")
     REMOVE_BACKPACK = (By.ID, "remove-sauce-labs-backpack")
+    REMOVE_BIKE_LIGHT = (By.ID, "remove-sauce-labs-bike-light")
 
-    def is_loaded(self) -> bool:
+    def is_loaded(self):
         return self.is_inventory_displayed()
 
-    def is_inventory_displayed(self) -> bool:
+    def is_inventory_displayed(self):
         return self.is_visible(self.TITLE) and self.get_text(self.TITLE) == "Products"
 
     def add_backpack_to_cart(self):
         self.click(self.ADD_TO_CART_BACKPACK)
+        self.wait.until(lambda driver: driver.find_elements(*self.REMOVE_BACKPACK))
 
     def add_bike_light_to_cart(self):
         self.click(self.ADD_TO_CART_BIKE_LIGHT)
+        self.wait.until(lambda driver: driver.find_elements(*self.REMOVE_BIKE_LIGHT))
 
     def add_bolt_shirt_to_cart(self):
         self.click(self.ADD_TO_CART_BOLT_SHIRT)
 
     def remove_backpack(self):
         self.click(self.REMOVE_BACKPACK)
+        self.wait_until_invisible(self.REMOVE_BACKPACK)
 
-    def get_cart_count(self) -> str:
+    def get_cart_count(self):
         return self.get_text(self.SHOPPING_CART_BADGE)
 
-    def cart_badge_is_visible(self) -> bool:
-        return self.is_visible(self.SHOPPING_CART_BADGE)
+    def cart_badge_is_visible(self):
+        return bool(self.driver.find_elements(*self.SHOPPING_CART_BADGE))
 
     def go_to_cart(self):
         self.click(self.SHOPPING_CART_LINK)
+        self.wait_for_url("cart.html")
 
-    def sort_by(self, option: str):
+    def sort_by(self, option):
         select = Select(self.find(self.SORT_DROPDOWN))
         select.select_by_value(option)
 
