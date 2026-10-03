@@ -1,5 +1,6 @@
 import pytest
 
+from pages.cart_page import CartPage
 from pages.inventory_page import InventoryPage
 
 
@@ -30,9 +31,9 @@ def test_checkout_requires_postal_code(checkout_page):
 
 
 @pytest.mark.checkout
-def test_cancel_checkout_returns_to_inventory(checkout_page):
+def test_cancel_checkout_returns_to_cart(checkout_page):
     checkout_page.cancel_checkout()
-    assert InventoryPage(checkout_page.driver).is_inventory_displayed()
+    assert CartPage(checkout_page.driver).get_cart_item_count() == 1
 
 
 @pytest.mark.checkout
