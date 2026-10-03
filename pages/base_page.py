@@ -20,7 +20,7 @@ class BasePage:
         self.driver.execute_script(
             "arguments[0].scrollIntoView({block: 'center', inline: 'center'});", element
         )
-        ActionChains(self.driver).move_to_element(element).click().perform()
+        self.driver.execute_script("arguments[0].click();", element)
 
     def enter_text(self, locator, text):
         element = self.wait.until(EC.visibility_of_element_located(locator))
