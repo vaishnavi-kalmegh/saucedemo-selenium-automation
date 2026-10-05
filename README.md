@@ -8,7 +8,7 @@ The project demonstrates maintainable test design, explicit waits, reusable fixt
 
 ## What is covered
 
-The suite contains **18 automated tests**:
+The suite is organized into Login, Cart, and Checkout scenarios. Test counts are reported only after a clean execution.
 
 | Area | Tests | Coverage |
 | --- | ---: | --- |
@@ -173,9 +173,6 @@ These images are captured from real Selenium runs; they are not mockups.
 
 ![Pytest HTML report](docs/images/pytest-report.png)
 
-### Test results (18 passed)
-![Test results](docs/images/test-results.png)
-
 ## CI/CD
 
 GitHub Actions runs the full suite on:
@@ -186,14 +183,14 @@ GitHub Actions runs the full suite on:
 
 The workflow uses **Python 3.12**, pip dependency caching, headless Chrome, and the pinned requirements file. Test reports and failure screenshots are uploaded as workflow artifacts.
 
-After a successful main-branch run, the workflow captures the three portfolio screenshots with Selenium and commits updated evidence images under docs/images/.
+After a successful main-branch run, the workflow captures the portfolio screenshots with Selenium and commits updated images under docs/images/.
 
 ## Portfolio highlights
 
 This project demonstrates:
 
 - Page Object Model design
-- 18 meaningful UI tests
+- Login, cart, and checkout UI coverage
 - Explicit Selenium waits
 - pytest fixtures and markers
 - Environment-overridable credentials
