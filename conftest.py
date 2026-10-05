@@ -87,8 +87,10 @@ def logged_in(driver, base_url, credentials):
     LoginPage(driver).load(base_url).login(
         credentials["username"], credentials["password"]
     )
+
     inventory = InventoryPage(driver)
     inventory.wait_for_url("inventory.html")
+    assert inventory.is_inventory_displayed(), "Login did not reach the SauceDemo inventory page."
     return inventory
 
 
